@@ -1,0 +1,166 @@
+#include <ESP8266WiFi.h>
+ 
+const char* ssid = "RJ Ajay"; //give yours
+const char* password = "ajay12345";
+ 
+WiFiServer server(80);
+ 
+void setup() {
+pinMode(12,OUTPUT);
+pinMode(14,OUTPUT);
+pinMode(2,OUTPUT);
+pinMode(0,OUTPUT);
+  Serial.begin(115200);
+  delay(10);
+ 
+
+ 
+  // Connect to WiFi network
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+ 
+  WiFi.begin(ssid, password);
+ 
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
+ 
+  // Start the server
+  server.begin();
+  Serial.println("Server started");
+ 
+  // Print the IP address
+  Serial.print("Use this URL to connect: ");
+  Serial.print("http://");
+  Serial.print(WiFi.localIP());
+  Serial.println("/");
+ 
+}
+ 
+void loop() {
+  // Check if a client has connected
+  WiFiClient client = server.available();
+  if (!client) {
+    return;
+  }
+ 
+  // Wait until the client sends some data
+  Serial.println("new client");
+  while(!client.available()){
+    delay(1);
+  }
+ 
+  // Read the first line of the request
+  String request = client.readStringUntil('\r');
+  Serial.println(request);
+  client.flush();
+ 
+  // Match the request
+ 
+  String value="";
+  if (request.indexOf("/RIGHT") != -1)  {
+     digitalWrite(12,1 );
+      digitalWrite(14,0);
+      digitalWrite(2,1 );
+      digitalWrite(0,0);
+    value = "RIGHT";
+  }
+  if (request.indexOf("/LEFT") != -1)  {
+     digitalWrite(12,0);
+      digitalWrite(14,1);
+      digitalWrite(2,0 );
+      digitalWrite(0,1); 
+    value ="LEFT";
+  }
+  if (request.indexOf("/FORWARD") != -1)  {
+     digitalWrite(12,0);
+      digitalWrite(14,1 );
+      digitalWrite(2,1 );
+      digitalWrite(0,0 ); 
+    value ="FORWARD";
+  }
+   if (request.indexOf("/BACKWARD") != -1)  {
+    digitalWrite(12,1);
+      digitalWrite(14,0 );
+      digitalWrite(2,0 );
+      digitalWrite(0,1 ); 
+    value ="BACKWARD";
+  } 
+   if (request.indexOf("/STOP") != -1)  {
+    digitalWrite(12,0);
+      digitalWrite(14,0 );
+      digitalWrite(2,0 );
+      digitalWrite(0,0 ); 
+    value ="STOP";
+  } 
+  if (request.indexOf("/LBD") != -1)  {
+    digitalWrite(12,1);
+      digitalWrite(14,0 );
+      digitalWrite(2,1 );
+      digitalWrite(0,1 ); 
+    value ="LBDRIFT";
+  } 
+  if (request.indexOf("/LFD") != -1)  {
+    digitalWrite(12,0);
+      digitalWrite(14,1 );
+      digitalWrite(2,1);
+      digitalWrite(0,1 ); 
+    value ="LFDRIFT";
+  } 
+  if (request.indexOf("/RBD") != -1)  {
+    digitalWrite(12,1);
+      digitalWrite(14,1 );
+      digitalWrite(2,0 );
+      digitalWrite(0,1 ); 
+    value ="RBDRIFT";
+  } 
+  if (request.indexOf("/RFD") != -1)  {
+    digitalWrite(12,1);
+      digitalWrite(14,1 );
+      digitalWrite(2,1);
+      digitalWrite(0,0 ); 
+    value ="RFDRIFT";
+  } 
+// Set ledPin according to the request
+//digitalWrite(ledPin, value);
+  client.println("HTTP/1.1 2000 OK");
+  client.println("Content-Type: text/html");
+  client.println(""); //  do not forget this one
+  client.println("<!DOCTYPE HTML>");
+  client.println("<html>");
+   client.println("<center><h2>STARK INDUSTRIES</h2></center>");
+  client.println("<center><h3>WiFi controlled surveillance bot</h3></center>");
+  
+  client.println("<br><br><center>");
+   client.println("<a href=\"/LFD\"\"><button class='btn btn-primary'>LFDR</button></a>'-------<a href=\"/FORWARD\"\"><button class='btn btn-primary'>FRONT</button></a>'------'<a href=\"/RFD\"\"><button class='btn btn-primary'>RFDR</button></a>");
+  client.println("<h3/>");
+  client.println(".");
+  client.println(".");
+    client.println(".");
+  client.println(".");
+  client.println("<a href=\"/LEFT\"\"><button class='btn btn-primary'>LEFT</button></a>'-------<a href=\"/STOP\"\"><button class='btn btn-primary'>STOP</button></a>'------'<a href=\"/RIGHT\"\"><button class='btn btn-primary'>RIGHT</button></a>");
+  client.println("<h3/>");
+    client.println(".");
+  client.println(".");
+  client.println(".");
+  client.println(".");
+   client.println("<a href=\"/LBD\"\"><button class='btn btn-primary'>LBDR</button></a>'-------<a href=\"/BACKWARD\"\"><button class='btn btn-primary'>BACK</button></a>'------'<a href=\"/RBD\"\"><button class='btn btn-primary'>RBDR</button></a>");
+  client.println("</center></div>");
+  client.println("<div class='md-col-2'></div>");
+  client.println("</div>");
+  client.println("</div>");
+
+  client.println("</body>");  
+  client.println("</html>");
+ 
+  delay(1);
+  Serial.println("Client disonnected");
+  Serial.println("");
+ 
+}
+ 
